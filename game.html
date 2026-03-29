@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Coin Battle</title>
+
+<style>
+body{
+margin:0;
+background:#111;
+color:white;
+font-family:Arial;
+text-align:center;
+}
+
+canvas{
+background:#222;
+display:block;
+margin:auto;
+}
+
+#login{
+margin-top:50px;
+}
+
+#leaderboard{
+position:fixed;
+right:10px;
+top:10px;
+background:black;
+padding:10px;
+}
+</style>
+
+</head>
+<body>
+
+<div id="login">
+<h1>Coin Battle</h1>
+<input id="name" placeholder="اسمك">
+<button onclick="start()">ابدأ</button>
+</div>
+
+<canvas id="game" width="800" height="500"></canvas>
+
+<div id="leaderboard"></div>
+
+<script>
+
+let canvas = document.getElementById("game");
+let ctx = canvas.getContext("2d");
+
+let player = {x:100,y:100,size:30,score:0};
+let coins = [];
+let keys = {};
+let players = [];
+
+for(let i=0;i<10;i++){
+spawnCoin();
+}
+
+function spawnCoin(){
+coins.push({
+x:Math.random()*760,
+y:Math.random()*460
+});
+}
+
+document.addEventListener("keydown",e=>keys[e.key]=true);
+document.addEventListener("keyup",e=>keys[e.key]=false);
+
+function start(){
+
+let name = document.getElementById("name").value;
+if(!name)return;
+
+player.name = name;
+
+players.push(player);
+
+document.getElementById("login").style.display="none";
+
+gameLoop();
+}
+
+function move(){
+
+if(keys["ArrowUp"])player.y-=4;
+if(keys["ArrowDown"])player.y+=4;
+if(keys["ArrowLeft"])player.x-=4;
+if(keys["ArrowRight"])player.x+=4;
+
+}
+
+function checkCoins(){
+
+coins.forEach((coin,i)=>{
+
+let dx=player.x-coin.x;
+let dy=player.y-coin.y;
+
+let dist=Math.sqrt(dx*dx+dy*dy);
+
+if(dist<30){
+
+player.score++;
+
+coins.splice(i,1);
+
+spawnCoin();
+
+}
+
+});
+
+}
+
+function draw(){
+
+ctx.clearRect(0,0,800,500);
+
+ctx.fillStyle="yellow";
+ctx.fillRect(player.x,player.y,player.size,player.size);
+
+ctx.fillStyle="gold";
+
+coins.forEach(c=>{
+ctx.beginPath();
+ctx.arc(c.x,c.y,10,0,Math.PI*2);
+ctx.fill();
+});
+
+}
+
+function updateLeaderboard(){
+
+document.getElementById("leaderboard").innerHTML=
+"<b>Leaderboard</b><br>"+player.name+": "+player.score;
+
+}
+
+function gameLoop(){
+
+move();
+checkCoins();
+draw();
+updateLeaderboard();
+
+requestAnimationFrame(gameLoop);
+
+}
+
+</script>
+
+</body>
+</html>
